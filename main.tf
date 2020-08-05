@@ -1,30 +1,31 @@
 # Get the Region
 data "aws_region" "current" {}
 locals {
-  region = data.aws_region.current.name
+  region        = data.aws_region.current.name
   enabled_count = var.enabled ? 1 : 0
 }
 
 resource "aws_iam_role_policy" "this" {
-  count = local.enabled_count
+  count  = local.enabled_count
   name   = "${var.name}_task_role_policy"
-  policy = var.data_aws_iam_policy_document.json
+  policy = var.data_aws_iam_policy_document
   role   = aws_iam_role.this[0].id
 }
 
 resource "aws_iam_role" "this" {
-  count = local.enabled_count
+  count              = local.enabled_count
   name               = "${var.name}_task_role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role[0].json
 }
 
 resource "aws_cloudwatch_log_group" "this" {
-  count = local.enabled_count
-  name = var.name
+  count             = local.enabled_count
+  name              = var.name
+  retention_in_days = var.log_retention_in_days
 }
 
 resource "aws_ecs_task_definition" "this" {
-  count = local.enabled_count
+  count              = local.enabled_count
   family             = var.name
   task_role_arn      = aws_iam_role.this[0].arn
   execution_role_arn = aws_iam_role.ecs_task_execution_role[0].arn
@@ -104,12 +105,12 @@ data "aws_iam_policy_document" "ecs_task_execution_role_policy" {
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-  count = local.enabled_count
+  count              = local.enabled_count
   name               = "${var.name}_ecs_taskex_role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role[0].json
 }
 resource "aws_iam_role_policy" "ecs_task_execution_role_policy" {
-  count = local.enabled_count
+  count  = local.enabled_count
   name   = "${var.name}_ecs_taskex_role_policy"
   role   = aws_iam_role.ecs_task_execution_role[0].id
   policy = data.aws_iam_policy_document.ecs_task_execution_role_policy[0].json
