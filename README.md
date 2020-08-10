@@ -1,6 +1,13 @@
 # terraform-aws-easy-fargate
 
-A terraform module to create a Fargate task to run a specific job. This can be set up to run on a schedule or to be run manually. Think of it as a cron job that runs using Fargate.
+Sometimes you have an idea of a script you want to run on AWS. There's a public docker image you can use that has everything you need, and you know the command you want to run. But getting all the boilerplate up and running can be a pain. Enter: Easy Fargate.
+
+Features:
+
+* Sane Defaults
+* Looks up Default VPC/Subnets/SecurityGroups/etc unless told otherwise
+* Create a TaskDefinition
+* Optionally creates a schedule to run the job
 
 ## Usage
 
@@ -27,7 +34,24 @@ A terraform module to create a Fargate task to run a specific job. This can be s
 * `assign_public_ip` - Default `true`; Set to true if subnet is 'public' with IGW, false is subnet is 'private' with NAT GW. Defaults to true, as required by default vpc.
 * `log_retention_in_days` - Default `"60"`; The number of days you want to retain log events in the log group.
 
-### Example
+### Simple Example
+
+A barebones deployment that results in a task that runs every 7 days.
+
+```terraform
+module "simple-task" {
+  source              = "USSBA/easy-fargate/aws"
+  version             = "1.0.0"
+  enabled             = true
+  name                = "my-simple-task"
+  container_image     = "ubuntu:latest"
+  container_command   = ["curl", "https://www.google.com"]
+  schedule_expression = "rate(7 days)"
+```
+
+### Complex Example
+
+You may also have a desire to do something a little more complex, such as running an awscli command within your account (which requires IAM permissions), or running a task that needs secrets or environment variables.
 
 ```terraform
 module "my-fargate-task" {
