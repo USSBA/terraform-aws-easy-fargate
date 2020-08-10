@@ -37,5 +37,5 @@ workflows:
   version: 2
   branch_workflow:
     jobs:
-    # - poirot
+    - poirot
     - terraform-format-check
