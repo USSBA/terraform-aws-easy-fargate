@@ -10,21 +10,21 @@ data "aws_subnet_ids" "default" {
 # Fetch a data resource of a provided subnet [if provided]
 data "aws_subnet" "subnet_for_vpc_reference" {
   count = local.subnet_ids_provided ? 1 : 0
-  id = var.subnet_ids[0]
+  id    = var.subnet_ids[0]
 }
 
 locals {
-  create_schedule       = var.schedule_expression != ""
-  create_schedule_count = local.create_schedule ? 1 : 0
-  security_group_ids_provided   = length(var.security_group_ids) > 0
-  subnet_ids_provided   = length(var.subnet_ids) > 0
-  subnet_ids            = local.subnet_ids_provided ? var.subnet_ids : data.aws_subnet_ids.default[0].ids
+  create_schedule             = var.schedule_expression != ""
+  create_schedule_count       = local.create_schedule ? 1 : 0
+  security_group_ids_provided = length(var.security_group_ids) > 0
+  subnet_ids_provided         = length(var.subnet_ids) > 0
+  subnet_ids                  = local.subnet_ids_provided ? var.subnet_ids : data.aws_subnet_ids.default[0].ids
   # If subnet_ids are provided, look up the VPC id associated with them.  If not, use the default VPC
-  vpc_id                = local.subnet_ids_provided ? data.aws_subnet.subnet_for_vpc_reference[0].vpc_id : data.aws_vpc.default[0].id
+  vpc_id = local.subnet_ids_provided ? data.aws_subnet.subnet_for_vpc_reference[0].vpc_id : data.aws_vpc.default[0].id
 }
 resource "aws_security_group" "allow_outbound_traffic" {
   # Only create if no security_group_ids were provided
-  count = local.security_group_ids_provided ? 0 : 1
+  count       = local.security_group_ids_provided ? 0 : 1
   name_prefix = "${var.name}-allow-outbound"
   description = "${var.name} Allow outbound traffic"
   vpc_id      = local.vpc_id
