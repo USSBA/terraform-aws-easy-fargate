@@ -3,11 +3,6 @@
 #  REQUIRED
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-variable "enabled" {
-  type        = bool
-  description = "Enable or Disable all resources in the module"
-}
 variable "name" {
   type        = string
   description = "A plaintext name for named resources, compatible with task definition family names and cloudwatch log groups"
@@ -27,6 +22,11 @@ variable "container_command" {
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+variable "enabled" {
+  type        = bool
+  description = "Enable or Disable all resources in the module"
+  default     = true
+}
 variable "container_cpu" {
   type        = number
   description = "How much CPU should be reserved for the container (in aws cpu-units)"
