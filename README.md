@@ -15,13 +15,13 @@ Features:
 
 #### Required
 
-* `enabled` - Enable or Disable all resources in the module.
 * `name` - A plaintext name for named resources, compatible with task definition family names and cloudwatch log groups.
 * `container_image` - Docker Image tag to be used.
 * `container_command` - Docker Command array to be passed to the container.
 
 #### Optional
 
+* `enabled` - Default `true`; Enable or Disable all resources in the module.
 * `container_cpu` - Default `256`; How much CPU should be reserved for the container (in aws cpu-units).
 * `container_memory` - Default `512`; How much Memory should be reserved for the container (in MB).
 * `container_environment_variables` - Default `[]`; Environment Variables to be passed in to the container.
@@ -42,7 +42,6 @@ A barebones deployment that results in a task that runs every 7 days.
 module "simple-task" {
   source              = "USSBA/easy-fargate/aws"
   version             = "1.0.0"
-  enabled             = true
   name                = "my-simple-task"
   container_image     = "ubuntu:latest"
   container_command   = ["curl", "https://www.google.com"]
