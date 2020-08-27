@@ -3,11 +3,6 @@
 #  REQUIRED
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-variable "enabled" {
-  type        = bool
-  description = "Enable or Disable all resources in the module"
-}
 variable "name" {
   type        = string
   description = "A plaintext name for named resources, compatible with task definition family names and cloudwatch log groups"
@@ -16,10 +11,6 @@ variable "container_image" {
   type        = string
   description = "Docker Image tag to be used"
 }
-variable "container_command" {
-  type        = list(string)
-  description = "Docker Command array to be passed to the container"
-}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
@@ -27,6 +18,11 @@ variable "container_command" {
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+variable "enabled" {
+  type        = bool
+  description = "Enable or Disable all resources in the module"
+  default     = true
+}
 variable "container_cpu" {
   type        = number
   description = "How much CPU should be reserved for the container (in aws cpu-units)"
@@ -52,6 +48,11 @@ variable "container_secrets" {
   }))
   description = "ECS Task Secrets stored in SSM to be passed in to the container and have permissions granted to read"
   default     = []
+}
+variable "container_command" {
+  type        = list(string)
+  description = "Docker Command array to be passed to the container"
+  default     = null
 }
 variable "data_aws_iam_policy_document" {
   type        = string
