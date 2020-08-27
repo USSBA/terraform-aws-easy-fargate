@@ -11,10 +11,6 @@ variable "container_image" {
   type        = string
   description = "Docker Image tag to be used"
 }
-variable "container_command" {
-  type        = list(string)
-  description = "Docker Command array to be passed to the container"
-}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
@@ -52,6 +48,11 @@ variable "container_secrets" {
   }))
   description = "ECS Task Secrets stored in SSM to be passed in to the container and have permissions granted to read"
   default     = []
+}
+variable "container_command" {
+  type        = list(string)
+  description = "Docker Command array to be passed to the container"
+  default     = null
 }
 variable "data_aws_iam_policy_document" {
   type        = string
