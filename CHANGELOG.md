@@ -1,3 +1,7 @@
+# v2.0.1
+
+- **Terraform 13** initial release
+
 # v1.0.1
 
 - Making `container_command` and `enabled` optional
