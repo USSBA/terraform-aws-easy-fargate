@@ -1,6 +1,14 @@
+# v2.0.2
+
+- Adding `security_group_ids` to output
+
 # v2.0.1
 
 - **Terraform 13** initial release
+
+# v1.0.2
+
+- Adding `security_group_ids` to output
 
 # v1.0.1
 

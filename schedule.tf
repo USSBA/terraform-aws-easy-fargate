@@ -17,6 +17,7 @@ locals {
   create_schedule             = var.schedule_expression != ""
   create_schedule_count       = local.create_schedule ? 1 : 0
   security_group_ids_provided = length(var.security_group_ids) > 0
+  security_group_ids          = local.security_group_ids_provided ? var.security_group_ids : [aws_security_group.allow_outbound_traffic[0].id]
   subnet_ids_provided         = length(var.subnet_ids) > 0
   subnet_ids                  = local.subnet_ids_provided ? var.subnet_ids : data.aws_subnet_ids.default[0].ids
   # If subnet_ids are provided, look up the VPC id associated with them.  If not, use the default VPC
@@ -57,7 +58,7 @@ resource "aws_cloudwatch_event_target" "fargate_scheduled_task" {
 
     network_configuration {
       subnets          = local.subnet_ids
-      security_groups  = local.security_group_ids_provided ? var.security_group_ids : [aws_security_group.allow_outbound_traffic[0].id]
+      security_groups  = local.security_group_ids
       assign_public_ip = var.assign_public_ip
     }
   }
