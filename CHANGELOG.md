@@ -1,3 +1,7 @@
+# v1.0.2
+
+- Adding `security_group_ids` to output
+
 # v1.0.1
 
 - Making `container_command` and `enabled` optional
