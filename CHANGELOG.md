@@ -1,14 +1,20 @@
-# v2.0.2
+# v2.1.0
 
-- Adding `security_group_ids` to output
+- Output `security_group_ids`
+- Output `log_group`
+- Configurable `log_group` name
+- Configurable `stream_prefix` name
 
 # v2.0.1
 
 - **Terraform 13** initial release
 
-# v1.0.2
+# v1.1.0
 
-- Adding `security_group_ids` to output
+- Output `security_group_ids`
+- Output `log_group`
+- Configurable `log_group` name
+- Configurable `stream_prefix` name
 
 # v1.0.1
 

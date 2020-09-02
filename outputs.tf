@@ -10,3 +10,6 @@ output "task_execution_role" {
 output "security_group_ids" {
   value = local.security_group_ids
 }
+output "log_group" {
+  value = aws_cloudwatch_log_group.this
+}
