@@ -20,7 +20,7 @@ resource "aws_iam_role" "this" {
 
 resource "aws_cloudwatch_log_group" "this" {
   count             = local.enabled_count
-  name              = var.name
+  name              = length(var.log_group_name) > 0 ? var.log_group_name : var.name
   retention_in_days = var.log_retention_in_days
 }
 
@@ -51,7 +51,7 @@ resource "aws_ecs_task_definition" "this" {
           options = {
             awslogs-group         = var.name
             awslogs-region        = local.region
-            awslogs-stream-prefix = "container"
+            awslogs-stream-prefix = var.log_group_stream_prefix
           }
         }
       },
