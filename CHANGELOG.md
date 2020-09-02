@@ -1,3 +1,7 @@
+# v2.1.1
+
+- Bugfix: Plumb `container_secrets` into container 🤭
+
 # v2.1.0
 
 - Output `security_group_ids`

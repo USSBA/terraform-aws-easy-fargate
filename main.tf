@@ -44,6 +44,7 @@ resource "aws_ecs_task_definition" "this" {
         memory       = var.container_memory
         image        = var.container_image
         environment  = var.container_environment_variables
+        secrets      = var.container_secrets
         command      = var.container_command
         essential    = true
         logConfiguration = {
