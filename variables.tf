@@ -86,6 +86,16 @@ variable "assign_public_ip" {
 }
 variable "log_retention_in_days" {
   type        = string
-  description = "The number of days you want to retain log events in the log group"
+  description = "Optional; The number of days you want to retain log events in the log group.  Defaults to 60"
   default     = "60"
+}
+variable "log_group_name" {
+  type        = string
+  description = "Optional; The name of the log group. By default the `name` variable will be used."
+  default     = ""
+}
+variable "log_group_stream_prefix" {
+  type        = string
+  description = "Optional; The name of the log group stream prefix. By default this will be `container`."
+  default     = "container"
 }
