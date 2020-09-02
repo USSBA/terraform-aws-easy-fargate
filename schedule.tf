@@ -22,6 +22,8 @@ locals {
   subnet_ids                  = local.subnet_ids_provided ? var.subnet_ids : data.aws_subnet_ids.default[0].ids
   # If subnet_ids are provided, look up the VPC id associated with them.  If not, use the default VPC
   vpc_id = local.subnet_ids_provided ? data.aws_subnet.subnet_for_vpc_reference[0].vpc_id : data.aws_vpc.default[0].id
+
+  task_def_arn_wildcard = format("%s:*", regex("(.*):[^:]+$", aws_ecs_task_definition.this[0].arn)[0])
 }
 resource "aws_security_group" "allow_outbound_traffic" {
   # Only create if no security_group_ids were provided
@@ -78,7 +80,7 @@ resource "aws_iam_role_policy" "schedule_role_policy" {
                 "ecs:RunTask"
             ],
             "Resource": [
-                "${aws_ecs_task_definition.this[0].arn}"
+                "${local.task_def_arn_wildcard}"
             ]
         },
         {
@@ -115,4 +117,3 @@ resource "aws_iam_role" "schedule_role" {
 }
 EOF
 }
-
