@@ -41,7 +41,7 @@ A barebones deployment that results in a task that runs every 7 days.
 ```terraform
 module "simple-task" {
   source              = "USSBA/easy-fargate/aws"
-  version             = "1.0.0"
+  version             = "~> 2.0"
   name                = "my-simple-task"
   container_image     = "ubuntu:latest"
   container_command   = ["curl", "https://www.google.com"]
@@ -55,7 +55,7 @@ You may also have a desire to do something a little more complex, such as runnin
 ```terraform
 module "my-fargate-task" {
   source              = "USSBA/easy-fargate/aws"
-  version             = "1.0.0"
+  version             = "~> 2.0"
   enabled             = true
   name                = "my-fargate-task"
   container_image     = "ussba/cc-docker-git-aws"
@@ -100,6 +100,10 @@ We welcome contributions.
 To contribute please read our [CONTRIBUTING](CONTRIBUTING.md) document.
 
 All contributions are subject to the license and in no way imply compensation for contributions.
+
+### Terraform 0.12
+
+Our code base now exists in Terraform 0.13 and we are halting new features in the Terraform 0.12 major version.  If you wish to make a PR or merge upstream changes back into 0.12, please submit a PR to the `terraform-0.12` branch.
 
 ## Code of Conduct
 
