@@ -1,3 +1,7 @@
+# v2.1.2
+
+- Bugfix: Grant task execution role permissions to the taskdefinition family vs specific numbers.  This prevents policy replacement during task-definition version bumps
+
 # v2.1.1
 
 - Bugfix: Plumb `container_secrets` into container 🤭
