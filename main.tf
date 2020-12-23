@@ -6,7 +6,7 @@ locals {
 }
 
 resource "aws_iam_role_policy" "this" {
-  count  = local.enabled_count
+  count  = var.data_aws_iam_policy_document != "" ? local.enabled_count : 0
   name   = "${var.name}_task_role_policy"
   policy = var.data_aws_iam_policy_document
   role   = aws_iam_role.this[0].id
@@ -47,6 +47,7 @@ resource "aws_ecs_task_definition" "this" {
         secrets      = var.container_secrets
         command      = var.container_command
         essential    = true
+        mountPoints  = local.efs_mountpoints
         logConfiguration = {
           logDriver = "awslogs"
           options = {
@@ -58,6 +59,18 @@ resource "aws_ecs_task_definition" "this" {
       },
     ]
   )
+  dynamic "volume" {
+    iterator = volume
+    for_each = local.efs_volumes
+    content {
+      name = volume.value.vol_id
+      efs_volume_configuration {
+        file_system_id     = volume.value.file_system_id
+        root_directory     = volume.value.root_directory
+        transit_encryption = "ENABLED"
+      }
+    }
+  }
 }
 
 data "aws_iam_policy_document" "ecs_tasks_assume_role" {
@@ -115,4 +128,17 @@ resource "aws_iam_role_policy" "ecs_task_execution_role_policy" {
   name   = "${var.name}_ecs_taskex_role_policy"
   role   = aws_iam_role.ecs_task_execution_role[0].id
   policy = data.aws_iam_policy_document.ecs_task_execution_role_policy[0].json
+}
+
+locals {
+  efs_volumes = distinct([for config in var.efs_configs : {
+    vol_id         = md5("${config.file_system_id}-${config.root_directory}")
+    file_system_id = config.file_system_id
+    root_directory = config.root_directory
+  }])
+  efs_mountpoints = [for config in var.efs_configs : {
+    containerPath = config.container_path
+    sourceVolume  = md5("${config.file_system_id}-${config.root_directory}")
+    readOnly      = false
+  }]
 }
