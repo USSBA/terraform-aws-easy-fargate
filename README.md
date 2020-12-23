@@ -99,7 +99,7 @@ module "my-fargate-task" {
 We welcome contributions.
 To contribute please read our [CONTRIBUTING](CONTRIBUTING.md) document.
 
-All contributions are subject to the license and in no way imply compensation for contributions.
+All contributions are subject to the [license](LICENSE.md) and in no way imply compensation for contributions.
 
 ### Terraform 0.12
 
