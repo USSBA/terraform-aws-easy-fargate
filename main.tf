@@ -132,13 +132,13 @@ resource "aws_iam_role_policy" "ecs_task_execution_role_policy" {
 
 locals {
   efs_volumes = distinct([for config in var.efs_configs : {
-    vol_id         = md5("${config.file_system_id}-${config.root_directory}")
+    vol_id         = "${config.file_system_id}-${md5(config.root_directory)}"
     file_system_id = config.file_system_id
     root_directory = config.root_directory
   }])
   efs_mountpoints = [for config in var.efs_configs : {
     containerPath = config.container_path
-    sourceVolume  = md5("${config.file_system_id}-${config.root_directory}")
+    sourceVolume  = "${config.file_system_id}-${md5(config.root_directory)}"
     readOnly      = false
   }]
 }
