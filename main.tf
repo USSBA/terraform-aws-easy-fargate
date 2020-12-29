@@ -131,11 +131,16 @@ resource "aws_iam_role_policy" "ecs_task_execution_role_policy" {
 }
 
 locals {
+  # Craft the efs_volumes config.  We need one element per "fs_id + directory", and
+  # a volume ID that can be referenced from the mountpoints config below
   efs_volumes = distinct([for config in var.efs_configs : {
     vol_id         = "${config.file_system_id}-${md5(config.root_directory)}"
     file_system_id = config.file_system_id
     root_directory = config.root_directory
   }])
+
+  # Craft the container mountpoint config. We need one element per mountpoint within
+  # the container, referencing a volume ID from the volume config above
   efs_mountpoints = [for config in var.efs_configs : {
     containerPath = config.container_path
     sourceVolume  = "${config.file_system_id}-${md5(config.root_directory)}"
