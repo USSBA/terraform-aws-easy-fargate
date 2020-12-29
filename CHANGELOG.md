@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.0
+
+- Adding `efs_configs` to allow multiple EFS mounts.
+
 ## v2.1.2
 
 - Bugfix: Grant task execution role permissions to the taskdefinition family vs specific numbers.  This prevents policy replacement during task-definition version bumps

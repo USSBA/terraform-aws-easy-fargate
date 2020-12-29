@@ -99,3 +99,12 @@ variable "log_group_stream_prefix" {
   description = "Optional; The name of the log group stream prefix. By default this will be `container`."
   default     = "container"
 }
+variable "efs_configs" {
+  type = list(object({
+    file_system_id = string
+    root_directory = string
+    container_path = string
+  }))
+  description = "Optional; List of {file_system_id, root_directory, container_path} EFS mounts."
+  default     = []
+}

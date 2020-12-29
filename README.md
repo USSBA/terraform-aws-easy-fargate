@@ -33,6 +33,7 @@ Features:
 * `security_group_ids` - Default `[]`; Only required if `schedule_expression` is set; default is nothing. Will create an outbound permissive SG if none is provided.
 * `assign_public_ip` - Default `true`; Set to true if subnet is 'public' with IGW, false is subnet is 'private' with NAT GW. Defaults to true, as required by default vpc.
 * `log_retention_in_days` - Default `"60"`; The number of days you want to retain log events in the log group.
+* `efs_configs` - Default adds no volume mounts; List of {file_system_id, root_directory, container_path} EFS mounts
 
 ### Simple Example
 
@@ -46,6 +47,7 @@ module "simple-task" {
   container_image     = "ubuntu:latest"
   container_command   = ["curl", "https://www.google.com"]
   schedule_expression = "rate(7 days)"
+}
 ```
 
 ### Complex Example
@@ -62,6 +64,13 @@ module "my-fargate-task" {
   container_command   = ["aws", "s3", "ls"]
   schedule_expression = "rate(7 days)"
   ecs_cluster_arn     = "arn:aws:ecs:us-east-1:123456789012:cluster/my-ecs-cluster"
+  efs_configs = [
+    {
+      file_system_id = "fs-12341234"
+      root_directory = "/path/on/efs"
+      container_path = "/path/within/container"
+    }
+  ]
   data_aws_iam_policy_document = jsonencode(
     {
       "Version" : "2012-10-17",
