@@ -1,10 +1,13 @@
+data "aws_caller_identity" "current" {}
 module "efs-task" {
   #source              = "USSBA/easy-fargate/aws"
   #version             = "~> 2.0"
   source = "../../"
 
-  name            = "easy-fargate-efs-task"
-  container_image = "ubuntu:latest"
+  name                = "easy-fargate-efs-task"
+  container_image     = "ubuntu:latest"
+  schedule_expression = "rate(5 minutes)"
+  ecs_cluster_arn     = "arn:aws:ecs:us-east-1:${data.aws_caller_identity.current.account_id}:cluster/default"
   container_command = ["bash", "-cx", <<-EOT
      apt update;
      apt install tree -y;

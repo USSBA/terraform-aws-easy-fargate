@@ -54,6 +54,7 @@ resource "aws_cloudwatch_event_target" "fargate_scheduled_task" {
   role_arn = aws_iam_role.schedule_role[0].arn
 
   ecs_target {
+    platform_version    = var.ecs_platform_version
     task_definition_arn = aws_ecs_task_definition.this[0].arn
     task_count          = 1
     launch_type         = "FARGATE"

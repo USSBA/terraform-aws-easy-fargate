@@ -1,6 +1,6 @@
 # Easy Fargate with multiple EFS
 
-If you check the logs after running the task once, you'll see something like:
+The task will run every 5 minutes.  If you check the logs after it runs once, you'll see something like:
 
 ```shell
 + tree /mnt
@@ -43,7 +43,7 @@ If you check the logs after running the task once, you'll see something like:
 3 directories, 5 files
 ```
 
-If you run it again (at least 1 minute later), the final tree will look like:
+When it runs again (5 minutes later), the final tree in the logs will look like:
 
 ```shell
 + tree /mnt
