@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.1
+
+- BUGFIX: Adding `ecs_platform_version` to ensure full compatibility with EFS
+- Added a default ecs_cluster_arn value to provide a clear error message when it is omitted but needed
+
 ## v2.2.0
 
 - Adding `efs_configs` to allow multiple EFS mounts.

@@ -34,6 +34,7 @@ Features:
 * `assign_public_ip` - Default `true`; Set to true if subnet is 'public' with IGW, false is subnet is 'private' with NAT GW. Defaults to true, as required by default vpc.
 * `log_retention_in_days` - Default `"60"`; The number of days you want to retain log events in the log group.
 * `efs_configs` - Default adds no volume mounts; List of {file_system_id, root_directory, container_path} EFS mounts
+* `ecs_platform_version` - Default `1.4.0`; Options at time of writing are `1.4.0` and `LATEST`
 
 ### Simple Example
 

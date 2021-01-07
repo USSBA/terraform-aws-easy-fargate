@@ -67,7 +67,7 @@ variable "schedule_expression" {
 variable "ecs_cluster_arn" {
   type        = string
   description = "Only required if a schedule_expression is set"
-  default     = ""
+  default     = "ERROR: Must set var.ecs_cluster_arn when using a schedule_expression"
 }
 variable "subnet_ids" {
   type        = list(string)
@@ -107,4 +107,10 @@ variable "efs_configs" {
   }))
   description = "Optional; List of {file_system_id, root_directory, container_path} EFS mounts."
   default     = []
+}
+variable "ecs_platform_version" {
+  type        = string
+  description = "Optional; The ECS Platform version.  At time of writing, >= 1.4.0 is required for any EFS configurations"
+  # TODO: when LATEST points to 1.4.0, change default to LATEST
+  default = "1.4.0"
 }
