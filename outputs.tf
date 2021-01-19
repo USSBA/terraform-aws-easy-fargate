@@ -11,5 +11,5 @@ output "security_group_ids" {
   value = local.security_group_ids
 }
 output "log_group" {
-  value = aws_cloudwatch_log_group.this
+  value = try(aws_cloudwatch_log_group.this[0], null)
 }

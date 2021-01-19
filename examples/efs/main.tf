@@ -1,4 +1,5 @@
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 module "efs-task" {
   #source              = "USSBA/easy-fargate/aws"
   #version             = "~> 3.0"
@@ -8,7 +9,7 @@ module "efs-task" {
   schedule_expression = "rate(5 minutes)"
   container_definitions = [
     {
-      name = "example"
+      name  = "example"
       image = "ubuntu:latest"
       command = ["bash", "-cx", <<-EOT
          apt update;
@@ -24,7 +25,7 @@ module "efs-task" {
       ]
     }
   ]
-  ecs_cluster_arn     = "arn:aws:ecs:us-east-1:${data.aws_caller_identity.current.account_id}:cluster/default"
+  ecs_cluster_arn = "arn:aws:ecs:us-east-1:${data.aws_caller_identity.current.account_id}:cluster/default"
   efs_configs = [
     # Mount 1: efs-one:/ => container:/mnt/one_a
     # Mount 2: efs-one:/ => container:/mnt/one_b
@@ -63,4 +64,8 @@ resource "aws_security_group_rule" "allow_fargate_into_efs" {
   protocol                 = "tcp"
   security_group_id        = aws_security_group.efs.id
   source_security_group_id = module.efs-task.security_group_ids[0]
+}
+
+output "validate-example" {
+  value = "Logs will be streaming to the log group here: https://console.aws.amazon.com/cloudwatch/home?region=${data.aws_region.current.name}#logsV2:log-groups/log-group/${module.efs-task.log_group.name}/log-events"
 }

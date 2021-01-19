@@ -9,7 +9,7 @@ variable "name" {
 }
 variable "container_definitions" {
   #type        = any
-  description = "Container configuration in the form of a json-encoded list of maps. Required sub-fields are: 'name', 'image'; the rest will attempt to use sane"
+  description = "Container configuration in the form of a json-encoded list of maps. Required sub-fields are: 'name', 'image'; the rest will attempt to use sane defaults"
   validation {
     condition     = can(var.container_definitions.*.name)
     error_message = "VALIDATION FAILURE: Every element of container_definitions must include a 'name' field."

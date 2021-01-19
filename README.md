@@ -16,19 +16,16 @@ Features:
 #### Required
 
 * `name` - A plaintext name for named resources, compatible with task definition family names and cloudwatch log groups.
-* `container_image` - Docker Image tag to be used.
-* `container_command` - Docker Command array to be passed to the container.
+* `container_definitions` - Container configuration in the form of a json-encoded list of maps. Required sub-fields are: 'name', 'image'; the rest will attempt to use sane defaults
 
 #### Optional
 
 * `enabled` - Default `true`; Enable or Disable all resources in the module.
-* `container_cpu` - Default `256`; How much CPU should be reserved for the container (in aws cpu-units).
-* `container_memory` - Default `512`; How much Memory should be reserved for the container (in MB).
-* `container_environment_variables` - Default `[]`; Environment Variables to be passed in to the container.
-* `container_secrets` - Default `[]`; ECS Task Secrets stored in SSM to be passed in to the container and have permissions granted to read.
+* `task_cpu` - Default `256`; How much CPU should be reserved for all of the containers combined (in aws cpu-units).
+* `task_memory` - Default `512`; How much Memory should be reserved for all of the containers combined(in MB).
 * `data_aws_iam_policy_document` - Default `""`; A JSON formated IAM policy providing the running container with permissions.
 * `schedule_expression` - Default `""`; How often Cloudwatch Events should kick off the task. See AWS documentation for [schedule expression rules](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html).
-* `ecs_cluster_arn` - Default `""`; ARN of the ECS cluster to run the scheduled task. Only required if a `schedule_expression` is set.
+* `ecs_cluster_arn` - ARN of the ECS cluster to run the scheduled task. Only required if a `schedule_expression` is set.
 * `subnet_ids` - Default `[]`; Only used if `schedule_expression` is set; default is the subnets in the default VPC. If no default vpc exists, this field is required.
 * `security_group_ids` - Default `[]`; Only required if `schedule_expression` is set; default is nothing. Will create an outbound permissive SG if none is provided.
 * `assign_public_ip` - Default `true`; Set to true if subnet is 'public' with IGW, false is subnet is 'private' with NAT GW. Defaults to true, as required by default vpc.
