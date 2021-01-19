@@ -24,9 +24,6 @@ locals {
   container_definitions = var.container_definitions
 
   container_definitions_with_defaults = [for container_definition in local.container_definitions : merge(
-    # If we are only provided one container, offer a default port of var.container_port
-    # Otherwise, the user will need to explicitly define a portMappings property that matched var.container_port
-    length(local.container_definitions) == 1 ? { portMappings = [{ containerPort = var.container_port }] } : {},
     {
       essential = true
       cpu       = floor(var.task_cpu / length(local.container_definitions))
@@ -34,7 +31,7 @@ locals {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.this.name
+          awslogs-group         = aws_cloudwatch_log_group.this[0].name
           awslogs-region        = var.log_group_region != "" ? var.log_group_region : local.region
           awslogs-stream-prefix = container_definition.name
         }

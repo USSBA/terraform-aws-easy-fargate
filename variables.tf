@@ -28,7 +28,7 @@ variable "container_definitions" {
   }
   validation {
     error_message = "VALIDATION FAILURE: Variable container_definitions.*.portMappings must all be unique."
-    condition     = length(distinct([for def in var.container_definitions : def.portMappings[0].containerPort if can(def.portMappings[0].containerPort)])) == le
+    condition     = length(distinct([for def in var.container_definitions : def.portMappings[0].containerPort if can(def.portMappings[0].containerPort)])) == length([for def in var.container_definitions : def.portMappings[0].containerPort if can(def.portMappings[0].containerPort)])
   }
 }
 
@@ -97,6 +97,11 @@ variable "log_group_stream_prefix" {
   type        = string
   description = "Optional; The name of the log group stream prefix. By default this will be `container`."
   default     = "container"
+}
+variable "log_group_region" {
+  type        = string
+  description = "Optional; The region where the log group exists. By default the current region will be used."
+  default     = ""
 }
 variable "efs_configs" {
   type = list(object({
