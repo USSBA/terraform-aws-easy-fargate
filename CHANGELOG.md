@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.0.0
+
+- **FEATURE:** Support for EFS has been added.
+- **BREAKING CHANGE:** `container_image` has been DEPRICATED, use `container_definitions[].image` instead.
+- **BREAKING CHAGNE:** `container_environment_variables` has been DEPRICATED, use `container_definitions[].environment` instead.
+- **BREAKING CHANGE:** `container_secrets` has been DEPRICATED, use `container_definitions[].secrets` instead.
+- **BREAKING CHANGE:** `container_command` has been DEPRICATED, use `container_definitions[].command` instead.
+- **BREAKING CHANGE:** `container_cpu` has been changed to `task_cpu` and its value will be divided evenly across containers unless explicitly set in the container definitions.
+- **BREAKING CHANGE:** `container_memory` has been changed to `task_memory` and its value will be divided evenly across containers unless explicitly set in the container definitions.
+
 ## v2.2.1
 
 - BUGFIX: Adding `ecs_platform_version` to ensure full compatibility with EFS
