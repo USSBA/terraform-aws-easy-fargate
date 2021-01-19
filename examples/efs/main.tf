@@ -1,25 +1,30 @@
 data "aws_caller_identity" "current" {}
 module "efs-task" {
   #source              = "USSBA/easy-fargate/aws"
-  #version             = "~> 2.0"
+  #version             = "~> 3.0"
   source = "../../"
 
   name                = "easy-fargate-efs-task"
-  container_image     = "ubuntu:latest"
   schedule_expression = "rate(5 minutes)"
-  ecs_cluster_arn     = "arn:aws:ecs:us-east-1:${data.aws_caller_identity.current.account_id}:cluster/default"
-  container_command = ["bash", "-cx", <<-EOT
-     apt update;
-     apt install tree -y;
-     tree /mnt;
-     touch /mnt/one_a/foo-`date -Iminutes`;
-     tree /mnt;
-     touch /mnt/one_b/bar-`date -Iminutes`;
-     tree /mnt;
-     touch /mnt/two/baz-`date -Iminutes`;
-     tree /mnt;
-   EOT
+  container_definitions = [
+    {
+      name = "example"
+      image = "ubuntu:latest"
+      command = ["bash", "-cx", <<-EOT
+         apt update;
+         apt install tree -y;
+         tree /mnt;
+         touch /mnt/one_a/foo-`date -Iminutes`;
+         tree /mnt;
+         touch /mnt/one_b/bar-`date -Iminutes`;
+         tree /mnt;
+         touch /mnt/two/baz-`date -Iminutes`;
+         tree /mnt;
+       EOT
+      ]
+    }
   ]
+  ecs_cluster_arn     = "arn:aws:ecs:us-east-1:${data.aws_caller_identity.current.account_id}:cluster/default"
   efs_configs = [
     # Mount 1: efs-one:/ => container:/mnt/one_a
     # Mount 2: efs-one:/ => container:/mnt/one_b
@@ -30,16 +35,19 @@ module "efs-task" {
     #   /mnt/one_b
     #   /mnt/two
     {
+      container_name = "example"
       file_system_id = aws_efs_file_system.efs-one.id
       root_directory = "/"
       container_path = "/mnt/one_a"
     },
     {
+      container_name = "example"
       file_system_id = aws_efs_file_system.efs-one.id
       root_directory = "/"
       container_path = "/mnt/one_b"
     },
     {
+      container_name = "example"
       file_system_id = aws_efs_file_system.efs-two.id
       root_directory = "/"
       container_path = "/mnt/two"
