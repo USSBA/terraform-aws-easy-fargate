@@ -7,9 +7,29 @@ variable "name" {
   type        = string
   description = "A plaintext name for named resources, compatible with task definition family names and cloudwatch log groups"
 }
-variable "container_image" {
-  type        = string
-  description = "Docker Image tag to be used"
+variable "container_definitions" {
+  #type        = any
+  description = "Container configuration in the form of a json-encoded list of maps. Required sub-fields are: 'name', 'image'; the rest will attempt to use sane defaults"
+  validation {
+    condition     = can(var.container_definitions.*.name)
+    error_message = "VALIDATION FAILURE: Every element of container_definitions must include a 'name' field."
+  }
+  validation {
+    condition     = can(var.container_definitions.*.image)
+    error_message = "VALIDATION FAILURE: Every element of container_definitions must include an 'image' field."
+  }
+  validation {
+    condition     = can(var.container_definitions[0])
+    error_message = "VALIDATION FAILURE: Variable container_definitions must be a list."
+  }
+  validation {
+    condition     = can(var.container_definitions[0])
+    error_message = "VALIDATION FAILURE: Variable container_definitions must be a list."
+  }
+  validation {
+    error_message = "VALIDATION FAILURE: Variable container_definitions.*.portMappings must all be unique."
+    condition     = length(distinct([for def in var.container_definitions : def.portMappings[0].containerPort if can(def.portMappings[0].containerPort)])) == length([for def in var.container_definitions : def.portMappings[0].containerPort if can(def.portMappings[0].containerPort)])
+  }
 }
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -23,36 +43,15 @@ variable "enabled" {
   description = "Enable or Disable all resources in the module"
   default     = true
 }
-variable "container_cpu" {
+variable "task_cpu" {
   type        = number
   description = "How much CPU should be reserved for the container (in aws cpu-units)"
   default     = 256
 }
-variable "container_memory" {
+variable "task_memory" {
   type        = number
   description = "How much Memory should be reserved for the container (in MB)"
   default     = 512
-}
-variable "container_environment_variables" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  description = "Environment Variables to be passed in to the container"
-  default     = []
-}
-variable "container_secrets" {
-  type = list(object({
-    name      = string
-    valueFrom = string
-  }))
-  description = "ECS Task Secrets stored in SSM to be passed in to the container and have permissions granted to read"
-  default     = []
-}
-variable "container_command" {
-  type        = list(string)
-  description = "Docker Command array to be passed to the container"
-  default     = null
 }
 variable "data_aws_iam_policy_document" {
   type        = string
@@ -99,8 +98,14 @@ variable "log_group_stream_prefix" {
   description = "Optional; The name of the log group stream prefix. By default this will be `container`."
   default     = "container"
 }
+variable "log_group_region" {
+  type        = string
+  description = "Optional; The region where the log group exists. By default the current region will be used."
+  default     = ""
+}
 variable "efs_configs" {
   type = list(object({
+    container_name = string
     file_system_id = string
     root_directory = string
     container_path = string

@@ -1,5 +1,16 @@
 # Changelog
 
+## v3.0.0
+
+- **BREAKING CHANGES:**
+  - `container_definitions` is the new location for all container definitions for the ECS Task Definition. This was done to enable the support of multiple containers in the task.
+  - `container_image` has been REMOVED, use `container_definitions[].image` instead.
+  - `container_environment_variables` has been REMOVED, use `container_definitions[].environment` instead.
+  - `container_secrets` has been REMOVED, use `container_definitions[].secrets` instead.
+  - `container_command` has been REMOVED, use `container_definitions[].command` instead.
+  - `container_cpu` has been changed to `task_cpu` and its value will be divided evenly across containers unless explicitly set in the container definitions.
+  - `container_memory` has been changed to `task_memory` and its value will be divided evenly across containers unless explicitly set in the container definitions.
+
 ## v2.2.1
 
 - BUGFIX: Adding `ecs_platform_version` to ensure full compatibility with EFS
@@ -11,7 +22,7 @@
 
 ## v2.1.2
 
-- Bugfix: Grant task execution role permissions to the taskdefinition family vs specific numbers.  This prevents policy replacement during task-definition version bumps
+- Bugfix: Grant task execution role permissions to the taskdefinition family vs specific numbers. This prevents policy replacement during task-definition version bumps
 
 ## v2.1.1
 
