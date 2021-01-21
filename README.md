@@ -39,12 +39,17 @@ A barebones deployment that results in a task that runs every 7 days.
 
 ```terraform
 module "simple-task" {
-  source              = "USSBA/easy-fargate/aws"
-  version             = "~> 2.0"
-  name                = "my-simple-task"
-  container_image     = "ubuntu:latest"
-  container_command   = ["curl", "https://www.google.com"]
-  schedule_expression = "rate(7 days)"
+  source                = "USSBA/easy-fargate/aws"
+  version               = "~> 3.0"
+  name                  = "easy-fargate-simple"
+  container_definitions = [
+    {
+      name    = "my-simple-ubuntu"
+      image   = "ubuntu:latest"
+      command = ["echo", "\"Hello, world.\""]
+    }
+  ]
+  schedule_expression = "rate(2 minutes)"
 }
 ```
 
@@ -54,16 +59,45 @@ You may also have a desire to do something a little more complex, such as runnin
 
 ```terraform
 module "my-fargate-task" {
-  source              = "USSBA/easy-fargate/aws"
-  version             = "~> 2.0"
-  enabled             = true
-  name                = "my-fargate-task"
-  container_image     = "ussba/cc-docker-git-aws"
-  container_command   = ["aws", "s3", "ls"]
+  source                = "USSBA/easy-fargate/aws"
+  version               = "~> 3.0"
+  enabled               = true
+  name                  = "my-fargate-task"
+  container_definitions = [
+    {
+      name  = "example"
+      image = "ubuntu:latest"
+      command = ["bash", "-cx", <<-EOT
+         apt update;
+         apt install tree -y;
+         tree /mnt;
+         touch /mnt/one_a/foo-`date -Iminutes`;
+         tree /mnt;
+         touch /mnt/one_b/bar-`date -Iminutes`;
+         tree /mnt;
+         touch /mnt/two/baz-`date -Iminutes`;
+         tree /mnt;
+       EOT
+      ]
+      environment = [
+        {
+          name  = "FOO"
+          value = "bar"
+        }
+      ]
+      secrets = [
+        {
+          name      = "FOO_SECRET"
+          valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/foo_secret"
+        }
+      ]
+    }
+  ]
   schedule_expression = "rate(7 days)"
   ecs_cluster_arn     = "arn:aws:ecs:us-east-1:123456789012:cluster/my-ecs-cluster"
   efs_configs = [
     {
+      container_name = "example"
       file_system_id = "fs-12341234"
       root_directory = "/path/on/efs"
       container_path = "/path/within/container"
@@ -86,18 +120,6 @@ module "my-fargate-task" {
       ]
     }
   )
-  container_environment_variables = [
-    {
-      name  = "FOO"
-      value = "bar"
-    }
-  ]
-  container_secrets = [
-    {
-      name      = "FOO_SECRET"
-      valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/foo_secret"
-    }
-  ]
 }
 ```
 
