@@ -38,6 +38,8 @@ resource "aws_security_group" "allow_outbound_traffic" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = merge(var.tags, var.tags_security_group)
 }
 
 resource "aws_cloudwatch_event_rule" "schedule_rule" {
@@ -45,6 +47,7 @@ resource "aws_cloudwatch_event_rule" "schedule_rule" {
   name                = var.name
   schedule_expression = var.schedule_expression
   is_enabled          = true
+  tags                = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "fargate_scheduled_task" {
@@ -117,4 +120,5 @@ resource "aws_iam_role" "schedule_role" {
   ]
 }
 EOF
+  tags               = var.tags
 }
