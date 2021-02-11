@@ -55,12 +55,14 @@ resource "aws_iam_role" "this" {
   count              = local.enabled_count
   name               = "${var.name}_task_role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role[0].json
+  tags               = var.tags
 }
 
 resource "aws_cloudwatch_log_group" "this" {
   count             = local.enabled_count
   name              = length(var.log_group_name) > 0 ? var.log_group_name : var.name
   retention_in_days = var.log_retention_in_days
+  tags              = var.tags
 }
 
 resource "aws_ecs_task_definition" "this" {
@@ -86,6 +88,7 @@ resource "aws_ecs_task_definition" "this" {
       }
     }
   }
+  tags = merge(var.tags, var.tags_ecs_task_definition)
 }
 
 data "aws_iam_policy_document" "ecs_tasks_assume_role" {
@@ -137,6 +140,7 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   count              = local.enabled_count
   name               = "${var.name}_ecs_taskex_role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role[0].json
+  tags               = var.tags
 }
 resource "aws_iam_role_policy" "ecs_task_execution_role_policy" {
   count  = local.enabled_count
@@ -144,4 +148,3 @@ resource "aws_iam_role_policy" "ecs_task_execution_role_policy" {
   role   = aws_iam_role.ecs_task_execution_role[0].id
   policy = data.aws_iam_policy_document.ecs_task_execution_role_policy[0].json
 }
-

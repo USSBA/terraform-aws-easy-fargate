@@ -15,6 +15,19 @@ module "simple-task" {
   ]
   schedule_expression = "rate(2 minutes)"
   ecs_cluster_arn     = "arn:aws:ecs:us-east-1:${data.aws_caller_identity.current.account_id}:cluster/default"
+
+  tags = {
+    ManagedBy = "Terraform"
+    foo       = "foo"
+  }
+  tags_ecs_task_definition = {
+    TaskDefinition = "Very Yes"
+    foo            = "bar"
+  }
+  tags_security_group = {
+    SecurityGroup = "Very Yes"
+    foo           = "baz"
+  }
 }
 
 output "validate-example" {

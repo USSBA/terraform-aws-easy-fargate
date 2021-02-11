@@ -119,3 +119,19 @@ variable "ecs_platform_version" {
   # TODO: when LATEST points to 1.4.0, change default to LATEST
   default = "1.4.0"
 }
+
+variable "tags" {
+  type        = map(any)
+  description = "Optional; Map of key-value tags to apply to all applicable resources"
+  default     = {}
+}
+variable "tags_ecs_task_definition" {
+  type        = map(any)
+  description = "Optional; Map of key-value tags to apply to the ecs task definition"
+  default     = {}
+}
+variable "tags_security_group" {
+  type        = map(any)
+  description = "Optional; Map of key-value tags to apply to the security group"
+  default     = {}
+}

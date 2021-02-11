@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.1.0
+
+- Adding `tags`, `tags_ecs_task_definition`, `tags_security_group` maps to allow for configuring resource level tags
+
 ## v3.0.0
 
 - **BREAKING CHANGES:**

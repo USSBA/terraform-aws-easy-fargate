@@ -32,6 +32,9 @@ Features:
 * `log_retention_in_days` - Default `"60"`; The number of days you want to retain log events in the log group.
 * `efs_configs` - Default adds no volume mounts; List of {file_system_id, root_directory, container_path} EFS mounts
 * `ecs_platform_version` - Default `1.4.0`; Options at time of writing are `1.4.0` and `LATEST`
+* `tags` - Default is no tags; Map of key-value tags to apply to all applicable resources
+* `tags_ecs_task_definition` - Default is no tags; Map of key-value tags to apply to the ecs task definition
+* `tags_security_group` - Default is no tags; Map of key-value tags to apply to the security group
 
 ### Simple Example
 
