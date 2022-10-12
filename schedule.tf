@@ -39,12 +39,13 @@ resource "aws_security_group" "allow_outbound_traffic" {
 }
 
 resource "aws_security_group_rule" "allow_outbound_traffic" {
+  count             = local.security_group_ids_provided ? 0 : 1
   type              = "egress"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.allow_outbound_traffic.id
+  security_group_id = aws_security_group.allow_outbound_traffic[0].id
 }
 
 resource "aws_cloudwatch_event_rule" "schedule_rule" {
