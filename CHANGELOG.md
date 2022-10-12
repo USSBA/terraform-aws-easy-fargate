@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.0.0
+
+- **BREAKING CHANGES:**
+  - Terraform version has been bumped to `~> 1.0`
+  - Terraform provider has been bumped to `~> 4.0`
+  - Security group egress traffic has been changed from an inline rule to the resource `aws_security_group_rule`
+
 ## v3.1.0
 
 - Adding `tags`, `tags_ecs_task_definition`, `tags_security_group` maps to allow for configuring resource level tags
