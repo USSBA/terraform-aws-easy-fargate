@@ -2,9 +2,12 @@ data "aws_vpc" "default" {
   count   = local.subnet_ids_provided ? 0 : 1
   default = true
 }
-data "aws_subnet_ids" "default" {
-  count  = local.subnet_ids_provided ? 0 : 1
-  vpc_id = data.aws_vpc.default[0].id
+data "aws_subnets" "default" {
+  count = local.subnet_ids_provided ? 0 : 1
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default[0].id]
+  }
 }
 
 # Fetch a data resource of a provided subnet [if provided]
@@ -19,7 +22,7 @@ locals {
   security_group_ids_provided = length(var.security_group_ids) > 0
   security_group_ids          = local.security_group_ids_provided ? var.security_group_ids : [aws_security_group.allow_outbound_traffic[0].id]
   subnet_ids_provided         = length(var.subnet_ids) > 0
-  subnet_ids                  = local.subnet_ids_provided ? var.subnet_ids : data.aws_subnet_ids.default[0].ids
+  subnet_ids                  = local.subnet_ids_provided ? var.subnet_ids : data.aws_subnets.default[0].ids
   # If subnet_ids are provided, look up the VPC id associated with them.  If not, use the default VPC
   vpc_id = local.subnet_ids_provided ? data.aws_subnet.subnet_for_vpc_reference[0].vpc_id : data.aws_vpc.default[0].id
 
