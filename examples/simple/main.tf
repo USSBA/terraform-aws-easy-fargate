@@ -1,8 +1,6 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 module "simple-task" {
-  #source              = "USSBA/easy-fargate/aws"
-  #version             = "~> 3.0"
   source = "../../"
 
   name = "easy-fargate-simple"
