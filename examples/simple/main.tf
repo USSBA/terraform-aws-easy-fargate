@@ -33,3 +33,7 @@ module "simple-task" {
 output "validate-example" {
   value = "Logs will be streaming to the log group here: https://console.aws.amazon.com/cloudwatch/home?region=${data.aws_region.current.name}#logsV2:log-groups/log-group/${module.simple-task.log_group.name}/log-events"
 }
+
+provider "aws" {
+  region = "us-east-1"
+}
