@@ -35,14 +35,16 @@ resource "aws_security_group" "allow_outbound_traffic" {
   description = "${var.name} Allow outbound traffic"
   vpc_id      = local.vpc_id
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = merge(var.tags, var.tags_security_group)
+}
+
+resource "aws_security_group_rule" "allow_outbound_traffic" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.allow_outbound_traffic.id
 }
 
 resource "aws_cloudwatch_event_rule" "schedule_rule" {
