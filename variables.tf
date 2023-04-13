@@ -63,6 +63,11 @@ variable "schedule_expression" {
   description = "Setting this will create a cloudwatch rule schedule to kick off the fargate task periodically"
   default     = ""
 }
+variable "schedule_enabled" {
+  type        = bool
+  description = "Setting this to false will disable the CloudWatch Event"
+  default     = true
+}
 variable "ecs_cluster_arn" {
   type        = string
   description = "Only required if a schedule_expression is set"

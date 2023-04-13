@@ -35,6 +35,7 @@ Features:
 * `tags` - Default is no tags; Map of key-value tags to apply to all applicable resources
 * `tags_ecs_task_definition` - Default is no tags; Map of key-value tags to apply to the ecs task definition
 * `tags_security_group` - Default is no tags; Map of key-value tags to apply to the security group
+* `schedule_enabled` - Setting this to false will disable the CloudWatch Event
 
 ### Simple Example
 

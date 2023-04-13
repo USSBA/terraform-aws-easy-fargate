@@ -1,5 +1,9 @@
 # Changelog
 
+## v4.1.0
+
+- Adding variable `schedule_enabled`. Setting this to false will disable the CloudWatch Event.
+
 ## v4.0.0
 
 - **BREAKING CHANGES:**
