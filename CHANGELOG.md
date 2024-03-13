@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.2.0
+
+- Terraform provider is now `~> 5.0`
+- Fixed warnings on depricated attributes.
+- ECS platform version now defaults to `LATEST`
+
 ## v4.1.0
 
 - Adding variable `schedule_enabled`. Setting this to false will disable the CloudWatch Event.

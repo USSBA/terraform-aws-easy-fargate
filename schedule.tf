@@ -52,7 +52,7 @@ resource "aws_cloudwatch_event_rule" "schedule_rule" {
   count               = local.create_schedule_count
   name                = var.name
   schedule_expression = var.schedule_expression
-  is_enabled          = var.schedule_enabled
+  state               = var.schedule_enabled ? "ENABLED" : "DISABLED"
   tags                = var.tags
 }
 
