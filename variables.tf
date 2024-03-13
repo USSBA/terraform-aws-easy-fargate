@@ -120,11 +120,9 @@ variable "efs_configs" {
 }
 variable "ecs_platform_version" {
   type        = string
-  description = "Optional; The ECS Platform version.  At time of writing, >= 1.4.0 is required for any EFS configurations"
-  # TODO: when LATEST points to 1.4.0, change default to LATEST
-  default = "1.4.0"
+  description = "Optional; The ECS Platform version."
+  default     = "LATEST"
 }
-
 variable "tags" {
   type        = map(any)
   description = "Optional; Map of key-value tags to apply to all applicable resources"

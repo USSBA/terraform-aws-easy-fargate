@@ -25,17 +25,17 @@ Features:
 * `task_memory` - Default `512`; How much Memory should be reserved for all of the containers combined(in MB).
 * `data_aws_iam_policy_document` - Default `""`; A JSON formated IAM policy providing the running container with permissions.
 * `schedule_expression` - Default `""`; How often Cloudwatch Events should kick off the task. See AWS documentation for [schedule expression rules](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html).
+* `schedule_enabled` - Default `true`; Setting this to `false` will disable the CloudWatch Event
 * `ecs_cluster_arn` - ARN of the ECS cluster to run the scheduled task. Only required if a `schedule_expression` is set.
 * `subnet_ids` - Default `[]`; Only used if `schedule_expression` is set; default is the subnets in the default VPC. If no default vpc exists, this field is required.
 * `security_group_ids` - Default `[]`; Only required if `schedule_expression` is set; default is nothing. Will create an outbound permissive SG if none is provided.
 * `assign_public_ip` - Default `true`; Set to true if subnet is 'public' with IGW, false is subnet is 'private' with NAT GW. Defaults to true, as required by default vpc.
 * `log_retention_in_days` - Default `"60"`; The number of days you want to retain log events in the log group.
 * `efs_configs` - Default adds no volume mounts; List of {file_system_id, root_directory, container_path} EFS mounts
-* `ecs_platform_version` - Default `1.4.0`; Options at time of writing are `1.4.0` and `LATEST`
+* `ecs_platform_version` - Default `LATEST`; The ECS platform version applied to the service
 * `tags` - Default is no tags; Map of key-value tags to apply to all applicable resources
 * `tags_ecs_task_definition` - Default is no tags; Map of key-value tags to apply to the ecs task definition
 * `tags_security_group` - Default is no tags; Map of key-value tags to apply to the security group
-* `schedule_enabled` - Setting this to false will disable the CloudWatch Event
 
 ### Simple Example
 
