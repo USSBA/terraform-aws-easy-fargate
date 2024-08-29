@@ -1,140 +1,136 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 #
-#  REQUIRED
+# NETWORK
 #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-variable "name" {
-  type        = string
-  description = "A plaintext name for named resources, compatible with task definition family names and cloudwatch log groups"
-}
-variable "container_definitions" {
-  #type        = any
-  description = "Container configuration in the form of a json-encoded list of maps. Required sub-fields are: 'name', 'image'; the rest will attempt to use sane defaults"
-  validation {
-    condition     = can(var.container_definitions.*.name)
-    error_message = "VALIDATION FAILURE: Every element of container_definitions must include a 'name' field."
-  }
-  validation {
-    condition     = can(var.container_definitions.*.image)
-    error_message = "VALIDATION FAILURE: Every element of container_definitions must include an 'image' field."
-  }
-  validation {
-    condition     = can(var.container_definitions[0])
-    error_message = "VALIDATION FAILURE: Variable container_definitions must be a list."
-  }
-  validation {
-    condition     = can(var.container_definitions[0])
-    error_message = "VALIDATION FAILURE: Variable container_definitions must be a list."
-  }
-  validation {
-    error_message = "VALIDATION FAILURE: Variable container_definitions.*.portMappings must all be unique."
-    condition     = length(distinct([for def in var.container_definitions : def.portMappings[0].containerPort if can(def.portMappings[0].containerPort)])) == length([for def in var.container_definitions : def.portMappings[0].containerPort if can(def.portMappings[0].containerPort)])
-  }
+
+variable "subnet_ids" {
+  description = "Required: A set of subnet_ids."
+  type        = list(string)
 }
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#
-#  OPTIONAL
-#
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+variable "security_group_ids" {
+  description = "Required: A set of security_group_ids."
+  type        = list(string)
+}
 
-variable "enabled" {
+variable "assign_public_ip" {
+  description = "Optional: Allow the automatic assignment of public-ips to the task when it starts."
   type        = bool
-  description = "Enable or Disable all resources in the module"
-  default     = true
+  default     = false
 }
+
+#
+# ECS TASK DEFINITION
+#
+
+variable "task_family" {
+  description = "Required: The name of the Fargate task family."
+  type        = string
+}
+
 variable "task_cpu" {
+  description = "Optional: The number of VCPUs allocated to the Fargate task. Default is 256."
   type        = number
-  description = "How much CPU should be reserved for the container (in aws cpu-units)"
   default     = 256
 }
+
 variable "task_memory" {
+  description = "Optional: The amount of Virtual Memory in MiB allocated to the Fargate task. Default is 512."
   type        = number
-  description = "How much Memory should be reserved for the container (in MB)"
   default     = 512
 }
-variable "data_aws_iam_policy_document" {
+
+variable "task_runtime_platform" {
+  description = "Optional: The containers runtime_platform. Default is LINUX"
   type        = string
-  description = "A JSON formated IAM policy providing the running container with permissions"
-  default     = ""
+  default     = "LINUX"
 }
-variable "schedule_expression" {
+
+variable "task_cpu_architecture" {
+  description = "Optional: The type of CPU architecture in which to run the Fargate under. Default is X86_64."
   type        = string
-  description = "Setting this will create a cloudwatch rule schedule to kick off the fargate task periodically"
-  default     = ""
+  default     = "X86_64"
 }
-variable "schedule_enabled" {
-  type        = bool
-  description = "Setting this to false will disable the CloudWatch Event"
-  default     = true
-}
-variable "ecs_cluster_arn" {
-  type        = string
-  description = "Only required if a schedule_expression is set"
-  default     = "ERROR: Must set var.ecs_cluster_arn when using a schedule_expression"
-}
-variable "subnet_ids" {
-  type        = list(string)
-  description = "Only used if a schedule_expression is set; default is the subnets in the default VPC.  If no default vpc exists, this field is required"
-  default     = []
-}
-variable "security_group_ids" {
-  type        = list(string)
-  description = "Only required if a schedule_expression is set; default is nothing.  Will create an outbound permissive SG if none is provided."
-  default     = []
-}
-variable "assign_public_ip" {
-  type        = bool
-  description = "Set to true if subnet is 'public' with IGW, false is subnet is 'private' with NAT GW. Defaults to true, as required by default vpc"
-  default     = true
-}
-variable "log_retention_in_days" {
-  type        = string
-  description = "Optional; The number of days you want to retain log events in the log group.  Defaults to 60"
-  default     = "60"
-}
-variable "log_group_name" {
-  type        = string
-  description = "Optional; The name of the log group. By default the `name` variable will be used."
-  default     = ""
-}
-variable "log_group_stream_prefix" {
-  type        = string
-  description = "Optional; The name of the log group stream prefix. By default this will be `container`."
-  default     = "container"
-}
-variable "log_group_region" {
-  type        = string
-  description = "Optional; The region where the log group exists. By default the current region will be used."
-  default     = ""
-}
-variable "efs_configs" {
+
+variable "task_exec_inline_policies" {
+  description = "Optional: Additional IAM policies applied to the execution role (e.g. the role used to start the container) of the Fargate task."
   type = list(object({
-    container_name = string
-    file_system_id = string
-    root_directory = string
-    container_path = string
+    name   = string
+    policy = string
   }))
-  description = "Optional; List of {file_system_id, root_directory, container_path} EFS mounts."
-  default     = []
+  default = []
 }
-variable "ecs_platform_version" {
+
+variable "task_inline_policies" {
+  description = "Optional: Additional IAM policies applied to the role (e.g. the role used after the container starts) of the Fargate task."
+  type = list(object({
+    name   = string
+    policy = string
+  }))
+  default = []
+}
+
+variable "task_container_definitions" {
+  description = "Required: A json encoded string containing a set of container definitions for the given Fargate task."
   type        = string
-  description = "Optional; The ECS Platform version."
+  validation {
+    condition     = length(var.task_container_definitions) > 0
+    error_message = "task_container_definitions -> must container at least 1 container definition"
+  }
+}
+
+variable "task_ephemeral_storage_size_in_gib" {
+  description = "Optional: The ephemeral_storage size in GiB that is allocated to the task at runtime."
+  type        = number
+  default     = 0
+}
+
+variable "task_count" {
+  description = "Optional: The number of task to start when the event is triggered."
+  type        = number
+  default     = 1
+}
+
+# POSIBLE FUTURE USE CASE
+#variable "task_container_overrides" {
+#  description = "A json encoded string reflecting a set of command layer overrides. `containerOverrides = [{name='container-name',command=['command']}]`"
+#  type        = string
+#  default     = ""
+#}
+
+#
+# ECS
+#
+
+variable "ecs_cluster_arn" {
+  description = "Required: The designated ECS cluster ARN in which the task will run."
+  type        = string
+}
+
+variable "ecs_execute_command_enabled" {
+  description = "Optional: Add statements to the IAM role of the task allowing `aws ecs execute-command' commands to function properly. By default is false."
+  type        = bool
+  default     = false
+}
+
+variable "ecs_platform_version" {
+  description = "Optional: The ECS platform version used to launch the Fargate container."
+  type        = string
   default     = "LATEST"
 }
-variable "tags" {
-  type        = map(any)
-  description = "Optional; Map of key-value tags to apply to all applicable resources"
-  default     = {}
+
+
+#
+# CLOUDWATCH EVENT RULE/TARGET
+#
+
+variable "schedule_expression" {
+  description = "Required: A cron() or rate() at which the event will take place."
+  type        = string
 }
-variable "tags_ecs_task_definition" {
-  type        = map(any)
-  description = "Optional; Map of key-value tags to apply to the ecs task definition"
-  default     = {}
-}
-variable "tags_security_group" {
-  type        = map(any)
-  description = "Optional; Map of key-value tags to apply to the security group"
-  default     = {}
+
+variable "schedule_state" {
+  description = "Optional: The running state (e.g. ENABLED or DISABLED) of the event."
+  type        = string
+  default     = "ENABLED"
 }

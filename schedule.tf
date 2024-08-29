@@ -1,130 +1,48 @@
-data "aws_vpc" "default" {
-  count   = local.subnet_ids_provided ? 0 : 1
-  default = true
-}
-data "aws_subnets" "default" {
-  count = local.subnet_ids_provided ? 0 : 1
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default[0].id]
-  }
-}
-
-# Fetch a data resource of a provided subnet [if provided]
-data "aws_subnet" "subnet_for_vpc_reference" {
-  count = local.subnet_ids_provided ? 1 : 0
-  id    = var.subnet_ids[0]
-}
-
-locals {
-  create_schedule             = var.schedule_expression != ""
-  create_schedule_count       = local.create_schedule ? 1 : 0
-  security_group_ids_provided = length(var.security_group_ids) > 0
-  security_group_ids          = local.security_group_ids_provided ? var.security_group_ids : [aws_security_group.allow_outbound_traffic[0].id]
-  subnet_ids_provided         = length(var.subnet_ids) > 0
-  subnet_ids                  = local.subnet_ids_provided ? var.subnet_ids : data.aws_subnets.default[0].ids
-  # If subnet_ids are provided, look up the VPC id associated with them.  If not, use the default VPC
-  vpc_id = local.subnet_ids_provided ? data.aws_subnet.subnet_for_vpc_reference[0].vpc_id : data.aws_vpc.default[0].id
-
-  task_def_arn_wildcard = format("%s:*", regex("(.*):[^:]+$", aws_ecs_task_definition.this[0].arn)[0])
-}
-resource "aws_security_group" "allow_outbound_traffic" {
-  # Only create if no security_group_ids were provided
-  count       = local.security_group_ids_provided ? 0 : 1
-  name_prefix = "${var.name}-allow-outbound"
-  description = "${var.name} Allow outbound traffic"
-  vpc_id      = local.vpc_id
-
-  tags = merge(var.tags, var.tags_security_group)
-}
-
-resource "aws_security_group_rule" "allow_outbound_traffic" {
-  count             = local.security_group_ids_provided ? 0 : 1
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.allow_outbound_traffic[0].id
-}
-
-resource "aws_cloudwatch_event_rule" "schedule_rule" {
-  count               = local.create_schedule_count
-  name                = var.name
+resource "aws_cloudwatch_event_rule" "event_rule" {
+  name                = var.task_family
   schedule_expression = var.schedule_expression
-  state               = var.schedule_enabled ? "ENABLED" : "DISABLED"
-  tags                = var.tags
+  state               = var.schedule_state
 }
 
-resource "aws_cloudwatch_event_target" "fargate_scheduled_task" {
-  count    = local.create_schedule_count
-  rule     = aws_cloudwatch_event_rule.schedule_rule[0].name
+resource "aws_cloudwatch_event_target" "event_target" {
+  rule     = aws_cloudwatch_event_rule.event_rule.name
   arn      = var.ecs_cluster_arn
-  role_arn = aws_iam_role.schedule_role[0].arn
+  role_arn = aws_iam_role.event_target.arn
+
+  # FUTURE USE CASE
+  #input    = var.task_container_overrides
 
   ecs_target {
-    platform_version    = var.ecs_platform_version
-    task_definition_arn = aws_ecs_task_definition.this[0].arn
-    task_count          = 1
-    launch_type         = "FARGATE"
+    enable_execute_command = var.ecs_execute_command_enabled
+    launch_type            = "FARGATE"
+    platform_version       = var.ecs_platform_version
+    task_count             = var.task_count
+    task_definition_arn    = aws_ecs_task_definition.task.arn
 
     network_configuration {
-      subnets          = local.subnet_ids
-      security_groups  = local.security_group_ids
+      subnets          = var.subnet_ids
+      security_groups  = var.security_group_ids
       assign_public_ip = var.assign_public_ip
     }
   }
 }
 
-resource "aws_iam_role_policy" "schedule_role_policy" {
-  count  = local.create_schedule_count
-  name   = "${var.name}_schedule_policy"
-  role   = aws_iam_role.schedule_role[0].id
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ecs:RunTask"
-            ],
-            "Resource": [
-                "${local.task_def_arn_wildcard}"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "iam:PassRole"
-            ],
-            "Resource": [
-                "${aws_iam_role.this[0].arn}",
-                "${aws_iam_role.ecs_task_execution_role[0].arn}"
-            ]
-        }
-    ]
-}
-EOF
+resource "aws_iam_role" "event_target" {
+  name               = "${var.task_family}-event-target"
+  assume_role_policy = data.aws_iam_policy_document.principal.json
+  inline_policy {
+    name   = "inline1"
+    policy = data.aws_iam_policy_document.event_target.json
+  }
 }
 
-resource "aws_iam_role" "schedule_role" {
-  count = local.create_schedule_count
-  name  = "${var.name}_schedule_role"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "events.amazonaws.com"
-      },
-      "Effect": "Allow"
-    }
-  ]
-}
-EOF
-  tags               = var.tags
+data "aws_iam_policy_document" "event_target" {
+  statement {
+    actions   = ["ecs:RunTask"]
+    resources = ["${aws_ecs_task_definition.task.arn_without_revision}:*"]
+  }
+  statement {
+    actions   = ["iam:PassRole"]
+    resources = [aws_iam_role.task.arn, aws_iam_role.exec.arn]
+  }
 }

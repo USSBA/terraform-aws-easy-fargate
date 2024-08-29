@@ -1,129 +1,145 @@
 # terraform-aws-easy-fargate
 
-Sometimes you have an idea of a script you want to run on AWS. There's a public docker image you can use that has everything you need, and you know the command you want to run. But getting all the boilerplate up and running can be a pain. Enter: Easy Fargate.
+If running a container on a schedule we have the solution for you.
 
-Features:
+## Variables
 
-* Sane Defaults
-* Looks up Default VPC/Subnets/SecurityGroups/etc unless told otherwise
-* Create a TaskDefinition
-* Optionally creates a schedule to run the job
+**assign_public_ip**  
+Optional: If the running task is behind NAT then this value should remain **false** as set by default; however, when running in a DMZ and the task needs to communicate with the WWW then this value should be **true**.
 
-## Usage
+**ecs_cluster_arn**  
+Required: An existing ECS cluster where the task will be started.
 
-### Variables
+**ecs_execute_command_enabled**  
+Optional: Add statements to the IAM role of the task allowing `aws ecs execute-command' commands to function properly.
 
-#### Required
+**ecs_platform_version**  
+Optional: By default the `LATEST` version of the ECS platform will be used.
 
-* `name` - A plaintext name for named resources, compatible with task definition family names and cloudwatch log groups.
-* `container_definitions` - Container configuration in the form of a json-encoded list of maps. Required sub-fields are: 'name', 'image'; the rest will attempt to use sane defaults
+**schedule_expression**  
+Required: A cron() or rate() at which the event will be triggered.
 
-#### Optional
+**schedule_state**  
+Optional: The operational state of the event; can be one of ENABLED or DISABLED.
 
-* `enabled` - Default `true`; Enable or Disable all resources in the module.
-* `task_cpu` - Default `256`; How much CPU should be reserved for all of the containers combined (in aws cpu-units).
-* `task_memory` - Default `512`; How much Memory should be reserved for all of the containers combined(in MB).
-* `data_aws_iam_policy_document` - Default `""`; A JSON formated IAM policy providing the running container with permissions.
-* `schedule_expression` - Default `""`; How often Cloudwatch Events should kick off the task. See AWS documentation for [schedule expression rules](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html).
-* `schedule_enabled` - Default `true`; Setting this to `false` will disable the CloudWatch Event
-* `ecs_cluster_arn` - ARN of the ECS cluster to run the scheduled task. Only required if a `schedule_expression` is set.
-* `subnet_ids` - Default `[]`; Only used if `schedule_expression` is set; default is the subnets in the default VPC. If no default vpc exists, this field is required.
-* `security_group_ids` - Default `[]`; Only required if `schedule_expression` is set; default is nothing. Will create an outbound permissive SG if none is provided.
-* `assign_public_ip` - Default `true`; Set to true if subnet is 'public' with IGW, false is subnet is 'private' with NAT GW. Defaults to true, as required by default vpc.
-* `log_retention_in_days` - Default `"60"`; The number of days you want to retain log events in the log group.
-* `efs_configs` - Default adds no volume mounts; List of {file_system_id, root_directory, container_path} EFS mounts
-* `ecs_platform_version` - Default `LATEST`; The ECS platform version applied to the service
-* `tags` - Default is no tags; Map of key-value tags to apply to all applicable resources
-* `tags_ecs_task_definition` - Default is no tags; Map of key-value tags to apply to the ecs task definition
-* `tags_security_group` - Default is no tags; Map of key-value tags to apply to the security group
+**security_group_ids**  
+Required: A set of security group ids assigned to the task by the event.
 
-### Simple Example
+**subnet_ids**  
+Required: A set of subnet ids assigned to the task by the event.
 
-A barebones deployment that results in a task that runs every 7 days.
+**task_container_definitions**  
+Required: A json encoded string containing a set of container definitions for the given Fargate task. See the example below and/or the [ContainerDefinition Documentation](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDefinition.html).
 
-```terraform
-module "simple-task" {
-  source                = "USSBA/easy-fargate/aws"
-  version               = "~> 3.0"
-  name                  = "easy-fargate-simple"
-  container_definitions = [
-    {
-      name    = "my-simple-ubuntu"
-      image   = "ubuntu:latest"
-      command = ["echo", "\"Hello, world.\""]
-    }
-  ]
-  schedule_expression = "rate(2 minutes)"
-}
+**task_count**  
+Optional: The number of task to start when the event is triggered; by default 1 task will start.
+
+**task_cpu**  
+Optional: The number of vCPU allocated to the task; by default 256 or 1/4 vCPU will be allocated.
+
+**task_memory**  
+Optional: The amount of Virtual Memory in MiB allocated to the Fargate task; by default 512 MiB is allocated.
+
+**task_cpu_architecture**  
+Optional: The CPU architecture used to lauch the task. One of X86_64 or ARM64; by default X86_64 is assigned.
+
+**task_ephemeral_storage_size_in_gib**  
+Optional: The ephemeral_storage size in GiB that is allocated to the task at runtime; by default no additional storage is allocated.
+
+**task_exec_inline_policies**  
+Optional: A set of additional IAM polcies assigned to the execution (start up) role.
+
+```
+task_exec_inline_policies = [
+  { name = "inline-policy-name", policy = "json-encoded-iam-policy" },
+]
 ```
 
-### Complex Example
+**task_inline_policies**  
+Optional: A set of additional IAM polcies assigned to the task (running) role.
 
-You may also have a desire to do something a little more complex, such as running an awscli command within your account (which requires IAM permissions), or running a task that needs secrets or environment variables.
+```
+task_exec_inline_policies = [
+  { name = "inline-policy-name", policy = "json-encoded-iam-policy" },
+]
+```
+
+**task_family**  
+Required: The name given to the ECS Task Definition and used in convention for other provisioned resources.
+
+**task_runtime_platform**  
+Optional: The runtime platform of the container; by default `LINUX` will be used.
+
+## Examples
+
+The following is a basic example.
 
 ```terraform
-module "my-fargate-task" {
-  source                = "USSBA/easy-fargate/aws"
-  version               = "~> 3.0"
-  enabled               = true
-  name                  = "my-fargate-task"
-  container_definitions = [
+
+module "your_module_name" {
+  source  = "USSBA/easy-fargate/aws"
+  version = "~> 5.0"
+
+  subnet_ids         = data.aws_subnets.target.ids
+  security_group_ids = data.aws_security_groups.target.ids
+
+  task_family = "${terraform.workspace}-your-service-name"
+  task_cpu    = 256
+  task_memory = 512
+
+  ecs_execute_command_enabled = false
+  ecs_cluster_arn             = data.aws_ecs_cluster.target.arn
+  schedule_expression         = "cron(0 5 ? * * *)"
+
+  task_container_definitions = jsonencode([
     {
-      name  = "example"
-      image = "ubuntu:latest"
-      command = ["bash", "-cx", <<-EOT
-         apt update;
-         apt install tree -y;
-         tree /mnt;
-         touch /mnt/one_a/foo-`date -Iminutes`;
-         tree /mnt;
-         touch /mnt/one_b/bar-`date -Iminutes`;
-         tree /mnt;
-         touch /mnt/two/baz-`date -Iminutes`;
-         tree /mnt;
-       EOT
-      ]
+      name      = "main"
+      image     = "your-image"
+      command   = ["your", "command"]
+      essential = true
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.your_log_group.name
+          awslogs-region        = "your-region"
+          awslogs-stream-prefix = "your-prefix"
+        }
+      }
       environment = [
-        {
-          name  = "FOO"
-          value = "bar"
-        }
+        { name = "AWS_DEFAULT_REGION", value = "your-default-region" },
       ]
-      secrets = [
-        {
-          name      = "FOO_SECRET"
-          valueFrom = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/foo_secret"
-        }
-      ]
+    },
+  ])
+  task_inline_policies = [
+    {
+      name   = "your-policy-name"
+      policy = data.aws_iam_policy_document.your_policy.json
     }
   ]
-  schedule_expression = "rate(7 days)"
-  ecs_cluster_arn     = "arn:aws:ecs:us-east-1:123456789012:cluster/my-ecs-cluster"
-  efs_configs = [
-    {
-      container_name = "example"
-      file_system_id = "fs-12341234"
-      root_directory = "/path/on/efs"
-      container_path = "/path/within/container"
+}
+
+resource "aws_cloudwatch_log_group" "your_log_group" {
+  name              = "${terraform.workspace}-your-log-group-name"
+  retention_in_days = 90
+}
+
+data "aws_iam_policy_document" "your_policy" {
+  statement {
+    actions = [
+      "s3:ListAllMyBuckets",
+      "s3:ListBucket",
+    ]
+    resources = ["*"]
+  }
+  statement {
+    actions   = ["s3:Get*"]
+    resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["us-west-2"]
     }
-  ]
-  data_aws_iam_policy_document = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Effect" : "Allow",
-          "Action" : [
-            "s3:ListBucket",
-            "s3:ListAllMyBuckets"
-          ],
-          "Resource" : [
-            "*"
-          ]
-        }
-      ]
-    }
-  )
+  }
 }
 ```
 
