@@ -1,5 +1,17 @@
 # Changelog
 
+## v5.0.0
+
+- This is a major overhaul of the module itself and may require prior versions to be destroyed, reconfigured, and re-deployed using v5.x of this module.
+- The module is no longer:
+  - Responsible for the [container definitions](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDefinition.html) of the task.
+  - Use the default VPC, Subnets and SecurityGroups by default.
+  - Using the default VPC by default.
+  - Creating a security group or log groups.
+- The vpc-id, subnet-ids, security-group-ids and cluster-arn must be provided.
+- The task Runtime Platform and CPU architecture are now configurable.
+- Inline IAM policies can be configured on both the task and task-execution roles.
+
 ## v4.2.0
 
 - Terraform provider is now `~> 5.0`
