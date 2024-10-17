@@ -1,5 +1,9 @@
 # Changelog
 
+## v6.0.0
+- The `inline_policy` attribute of IAM roles will be deprecated and has been replaced with `aws_iam_role_policies_exclusive` resource in union with the `aws_iam_role_policy` resource.
+- May require a `terraform init -upgrade` depending on the AWS provider version being so we are incrementing the major version.
+
 ## v5.0.0
 
 - This is a major overhaul of the module itself and may require prior versions to be destroyed, reconfigured, and re-deployed using v5.x of this module.
@@ -15,7 +19,7 @@
 ## v4.2.0
 
 - Terraform provider is now `~> 5.0`
-- Fixed warnings on depricated attributes.
+- Fixed warnings on deprecated attributes.
 - ECS platform version now defaults to `LATEST`
 
 ## v4.1.0

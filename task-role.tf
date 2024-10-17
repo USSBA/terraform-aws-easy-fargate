@@ -1,18 +1,22 @@
 resource "aws_iam_role" "task" {
   name               = "${var.task_family}-ecs-task"
   assume_role_policy = data.aws_iam_policy_document.principal.json
-  inline_policy {
-    name   = "inline-base"
-    policy = data.aws_iam_policy_document.task.json
-  }
-  dynamic "inline_policy" {
-    iterator = inline
-    for_each = var.task_inline_policies
-    content {
-      name   = "inline-${inline.value.name}"
-      policy = inline.value.policy
-    }
-  }
+}
+resource "aws_iam_role_policy" "task" {
+  name   = "inline1"
+  role   = aws_iam_role.task.id
+  policy = data.aws_iam_policy_document.task.json
+}
+resource "aws_iam_role_policy" "task_inline" {
+  count = length(var.task_inline_policies)
+
+  name   = "inline-${var.task_inline_policies[count.index].name}"
+  role   = aws_iam_role.task.id
+  policy = var.task_inline_policies[count.index].policy
+}
+resource "aws_iam_role_policies_exclusive" "task_inline" {
+  role_name    = aws_iam_role.task.name
+  policy_names = concat([aws_iam_role_policy.task.name], aws_iam_role_policy.task_inline.*.name)
 }
 data "aws_iam_policy_document" "task" {
   statement {
