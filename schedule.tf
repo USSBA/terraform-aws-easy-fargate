@@ -30,19 +30,31 @@ resource "aws_cloudwatch_event_target" "event_target" {
 resource "aws_iam_role" "event_target" {
   name               = "${var.task_family}-event-target"
   assume_role_policy = data.aws_iam_policy_document.principal.json
-  inline_policy {
-    name   = "inline1"
-    policy = data.aws_iam_policy_document.event_target.json
-  }
 }
-
+resource "aws_iam_role_policy" "event_target" {
+  name   = "inline1"
+  role   = aws_iam_role.event_target.id
+  policy = data.aws_iam_policy_document.event_target.json
+}
+resource "aws_iam_role_policies_exclusive" "event_target" {
+  role_name    = aws_iam_role.event_target.name
+  policy_names = [aws_iam_role_policy.event_target.name]
+}
 data "aws_iam_policy_document" "event_target" {
   statement {
-    actions   = ["ecs:RunTask"]
-    resources = ["${aws_ecs_task_definition.task.arn_without_revision}:*"]
+    actions = [
+      "ecs:RunTask"
+    ]
+    resources = [
+      "${aws_ecs_task_definition.task.arn_without_revision}:*"
+    ]
   }
   statement {
-    actions   = ["iam:PassRole"]
-    resources = [aws_iam_role.task.arn, aws_iam_role.exec.arn]
+    actions = [
+      "iam:PassRole"
+    ]
+    resources = [
+      aws_iam_role.task.arn, aws_iam_role.exec.arn
+    ]
   }
 }
